@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:${DB_PATH:/data/app.db}?journal_mode=WAL
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080

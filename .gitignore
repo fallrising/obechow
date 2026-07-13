@@ -1,0 +1,16 @@
+# Runtime / local data
+data/
+.tools/
+
+# Backend
+backend/target/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.log
