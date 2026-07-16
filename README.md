@@ -100,12 +100,10 @@ cd ../backend && mvn package
 
 The backend serves static files from `frontend/dist` and forwards non-API GET routes to `index.html` (SPA fallback).
 
-## CI/CD deployment
+## Documentation
 
-See [docs/CI_CD_RUNBOOK.md](./docs/CI_CD_RUNBOOK.md) for the full single-VPS deployment blueprint:
-
-`git push` → GitHub Actions → GHCR → SSH deploy → `https://deck.<your-domain>`
-
-## Session log
-
-See [WORK_LOG.md](./WORK_LOG.md) for a record of how this project was built and deployed.
+| Doc | Description |
+|-----|-------------|
+| [docs/TECH_SPEC.md](./docs/TECH_SPEC.md) | Architecture, tech choices, API spec, progress |
+| [docs/CI_CD_RUNBOOK.md](./docs/CI_CD_RUNBOOK.md) | Single-VPS deploy: `git push` → GHCR → SSH → Traefik |
+| [WORK_LOG.md](./WORK_LOG.md) | Build session history |
