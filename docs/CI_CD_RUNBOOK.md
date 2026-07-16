@@ -109,8 +109,8 @@ Repo 結構：
 obechow/
 ├── backend/                  # Spring Boot 3.x, Java 17, Maven
 ├── frontend/                 # Vite + React + TS + Tailwind + shadcn/ui
-├── Dockerfile                # Phase 3 待加
-├── .dockerignore             # Phase 3 待加
+├── Dockerfile                # Phase 3 已完成
+├── .dockerignore             # Phase 3 已完成
 └── .github/workflows/deploy.yml  # Phase 4 待加
 ```
 
@@ -150,30 +150,32 @@ cd frontend && npm install && npm run dev
 `Dockerfile`（repo 根目錄）：
 
 ```dockerfile
+# syntax=docker/dockerfile:1
+
 # ---- frontend build ----
-FROM node:20-alpine AS fe
-WORKDIR /fe
-COPY frontend/package*.json ./
+FROM node:22-alpine AS frontend-build
+WORKDIR /frontend
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
 # ---- backend build ----
-FROM maven:3.9-eclipse-temurin-17 AS be
-WORKDIR /be
+FROM maven:3.9-eclipse-temurin-17 AS backend-build
+WORKDIR /backend
 COPY backend/pom.xml ./
-RUN mvn -q -DskipTests dependency:go-offline
+RUN mvn --batch-mode --no-transfer-progress dependency:go-offline
 COPY backend/src ./src
-COPY --from=fe /fe/dist ./src/main/resources/static
-RUN mvn -q -DskipTests package
+COPY --from=frontend-build /frontend/dist ./src/main/resources/static
+RUN mvn --batch-mode --no-transfer-progress -DskipTests package
 
 # ---- runtime ----
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
-COPY --from=be /be/target/*.jar app.jar
-VOLUME /data
+COPY --from=backend-build /backend/target/skan-backend-*.jar app.jar
+VOLUME ["/data"]
 EXPOSE 8080
-ENTRYPOINT ["java","-XX:MaxRAMPercentage=75","-jar","app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
 ```
 
 `.dockerignore`：
@@ -182,11 +184,17 @@ ENTRYPOINT ["java","-XX:MaxRAMPercentage=75","-jar","app.jar"]
 **/node_modules
 **/target
 **/dist
-**/data
 .git
+.github
+.agents
+.codex
+.idea
+.vscode
+data
+*.log
 ```
 
-> **注意：** Dockerfile 把前端 build 產物複製到 `src/main/resources/static`，Spring Boot 會直接 serve 靜態檔。需確認 `WebConfig` / `SpaFallbackFilter` 與此路徑相容（或改為只依賴 classpath static）。
+Dockerfile 把前端 build 產物複製到 `src/main/resources/static`，Spring Boot 透過預設的 classpath resource handler serve 靜態檔；`SpaFallbackFilter` 負責深層 SPA 路由。
 
 本地整包測試：
 
@@ -401,7 +409,7 @@ cd /srv/edge && docker compose logs -f
 | Phase 0 | ⬜ VPS 手動 | Docker、edge network、`/srv` 目錄 |
 | Phase 1 | ⬜ VPS 手動 | Traefik + DNS |
 | Phase 2 | ✅ 完成 | 本 repo 後端 + 前端 MVP |
-| Phase 3 | ⬜ 待做 | `Dockerfile`、`.dockerignore` |
+| Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
 | Phase 4 | ⬜ 待做 | `.github/workflows/deploy.yml` + secrets |
 | Phase 5 | ⬜ VPS 手動 | compose + `deploy.sh` + GHCR login |
 | Phase 6 | ⬜ 待驗收 | 首次 push → 線上看到新版 |

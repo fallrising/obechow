@@ -15,16 +15,17 @@ A minimal Twitter deck clone: horizontally scrollable columns for browsing and p
 
 ```
 .
-├── backend/    # Spring Boot REST API
-├── frontend/   # Vite + React SPA
-└── data/       # SQLite database (created at runtime, gitignored)
+├── backend/     # Spring Boot REST API
+├── frontend/    # Vite + React SPA
+├── Dockerfile   # Single production image
+└── data/        # SQLite database (created at runtime, gitignored)
 ```
 
 ## Prerequisites
 
 - Java 17+
 - Maven 3.9+
-- Node.js 18+
+- Node.js 20.19+ or 22.12+
 
 ## Quick start
 
@@ -94,11 +95,14 @@ DB_PATH=../data/app.db mvn spring-boot:run
 ## Production build
 
 ```bash
-cd frontend && npm run build    # output: frontend/dist
-cd ../backend && mvn package
+docker build -t obechow:dev .
+docker run --rm -p 8080:8080 \
+  -v "$PWD/data:/data" \
+  -e DB_PATH=/data/app.db \
+  obechow:dev
 ```
 
-The backend serves static files from `frontend/dist` and forwards non-API GET routes to `index.html` (SPA fallback).
+Open **http://localhost:8080**. The multi-stage build compiles the frontend into the Spring Boot JAR under `classpath:/static`; the final image contains only the JRE and application JAR. Non-API GET routes without a file extension forward to `index.html` for SPA routing.
 
 ## Documentation
 

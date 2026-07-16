@@ -113,3 +113,25 @@ cd frontend && npm install && npm run dev
 ```
 
 Open http://localhost:5173, enter an author name, compose a post, and confirm it appears in all three deck columns.
+
+---
+
+## 2026-07-16 — Phase 3 production image
+
+Implemented the next deployment milestone:
+
+- Added a multi-stage `Dockerfile` using Node 22, Maven with Temurin 17, and a JRE-only runtime image.
+- Added `.dockerignore` rules for source-control metadata, local dependencies, build output, and runtime data.
+- Bundled the Vite output into the Spring Boot JAR at `classpath:/static`.
+- Removed the filesystem-only `WebConfig` resource override so packaged static assets use Spring Boot's default handler.
+- Corrected the documented Node.js prerequisite to match Vite 8's engine requirement.
+
+Verified the `obechow:dev` image locally:
+
+| Check | Result |
+|-------|--------|
+| Multi-stage `docker build` | Passed |
+| `GET /api/health` | `{"status":"ok"}` |
+| `GET /` and `GET /deck` | Bundled `index.html` returned |
+| Hashed JavaScript asset | Served from the packaged JAR |
+| `POST /api/posts` + filtered `GET` | SQLite write/read round trip passed |

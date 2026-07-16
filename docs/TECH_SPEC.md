@@ -2,7 +2,7 @@
 
 > **Repo:** [github.com/fallrising/obechow](https://github.com/fallrising/obechow)  
 > **版本：** MVP v0.1  
-> **最後更新：** 2026-07-13
+> **最後更新：** 2026-07-16
 
 ---
 
@@ -67,7 +67,7 @@ flowchart LR
     App --> DB
 ```
 
-前端 build 產物嵌入 Spring Boot（`classpath:/static` 或 `frontend/dist`），由同一個 process serve API 與 SPA，不需獨立 nginx 容器。
+前端 build 產物嵌入 Spring Boot 的 `classpath:/static`，由同一個 process serve API 與 SPA，不需獨立 nginx 容器。
 
 ### 2.3 CI/CD 架構（目標）
 
@@ -149,7 +149,7 @@ obechow/
 │   └── src/main/
 │       ├── java/com/skan/
 │       │   ├── SkanApplication.java
-│       │   ├── config/          # WebConfig, SpaFallbackFilter
+│       │   ├── config/          # SpaFallbackFilter
 │       │   ├── controller/      # HealthController, PostController
 │       │   ├── dto/             # CreatePostRequest
 │       │   ├── entity/          # Post
@@ -309,7 +309,7 @@ Base URL：開發 `http://localhost:8080`，生產 `https://deck.<網域>`
 | 路徑**無**副檔名（如 `/`、`/deck`） | 轉發至 `/index.html` |
 | 有副檔名（如 `/assets/app.js`） | 正常 serve 靜態檔 |
 
-實作：`SpaFallbackFilter` + `WebConfig`（開發時 serve `frontend/dist`）。
+實作：`SpaFallbackFilter`；靜態檔由 Spring Boot 預設的 `classpath:/static` resource handler 提供。
 
 ---
 
@@ -389,7 +389,7 @@ server: {
 | Phase 0 — VPS 準備 | ⬜ 待做 | Docker、edge network、`/srv` |
 | Phase 1 — Traefik | ⬜ 待做 | `/srv/edge/compose.yml`、DNS |
 | Phase 2 — 應用 MVP | ✅ 完成 | `backend/` + `frontend/` |
-| Phase 3 — Dockerfile | ⬜ 待做 | 單一 image，前端嵌入 static |
+| Phase 3 — Dockerfile | ✅ 完成 | 單一 image，前端嵌入 static |
 | Phase 4 — GitHub Actions | ⬜ 待做 | `.github/workflows/deploy.yml` |
 | Phase 5 — VPS app | ⬜ 待做 | compose + `/srv/deploy.sh` |
 | Phase 6 — 線上驗收 | ⬜ 待做 | push → 2–4 分鐘看到新版 |
@@ -446,4 +446,5 @@ flowchart TD
 
 | 日期 | 版本 | 變更 |
 |------|------|------|
+| 2026-07-16 | v0.1 | 完成 Phase 3：單一 Docker image 與 classpath static 驗證 |
 | 2026-07-13 | v0.1 | 初版：架構、選型、API、前端、進度總表 |

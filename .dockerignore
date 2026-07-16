@@ -1,0 +1,11 @@
+.git
+.github
+.agents
+.codex
+.idea
+.vscode
+**/node_modules
+**/target
+**/dist
+data
+*.log
