@@ -2,7 +2,7 @@
 task_id: P05-T03
 node_id: P05
 title: Review, document, and verify the deployment bundle
-status: blocked
+status: ready
 owner: codex
 depends_on:
   - P05-T01 accepted

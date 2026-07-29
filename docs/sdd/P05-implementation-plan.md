@@ -80,8 +80,9 @@ deletes the bind-mounted SQLite data directory.
 
 - [x] P05-T01 passes main-agent line review after correcting image-boundary,
       Traefik matcher, and resolver-name findings.
-- [ ] P05-T02 proves valid sequencing and invalid-input isolation.
-- [ ] Compose model and workflow lint pass.
+- [x] P05-T02 proves valid sequencing and invalid-input isolation after
+      strengthening the resolved-model and failure-stop oracles.
+- [x] Compose model and workflow lint pass.
 - [ ] Production image passes health/read-only smoke verification.
 - [ ] Documentation replaces unsafe inline examples with versioned artifacts.
 - [ ] Verification report separates repository completion from live VPS work.
