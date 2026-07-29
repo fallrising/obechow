@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P05
-status: ready
+status: implementing
 derived_from:
   - P05-vps-deployment-bundle.md
 owner: codex
@@ -78,7 +78,8 @@ deletes the bind-mounted SQLite data directory.
 
 ## Completion checklist
 
-- [ ] P05-T01 passes main-agent line review.
+- [x] P05-T01 passes main-agent line review after correcting image-boundary,
+      Traefik matcher, and resolver-name findings.
 - [ ] P05-T02 proves valid sequencing and invalid-input isolation.
 - [ ] Compose model and workflow lint pass.
 - [ ] Production image passes health/read-only smoke verification.

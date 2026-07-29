@@ -2,7 +2,7 @@
 task_id: P05-T01
 node_id: P05
 title: Implement the production Compose and deploy bundle
-status: ready
+status: accepted
 owner: opencode
 reviewer: codex
 depends_on:

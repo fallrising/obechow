@@ -1,7 +1,7 @@
 ---
 id: P05
 title: Versioned single-VPS deployment bundle
-status: ready
+status: implementing
 revision: 1
 baseline_commit: ca66162
 depends_on:

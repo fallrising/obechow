@@ -2,7 +2,7 @@
 task_id: P05-T02
 node_id: P05
 title: Add deployment contract tests and CI gate
-status: blocked
+status: ready
 owner: opencode
 reviewer: codex
 depends_on:
