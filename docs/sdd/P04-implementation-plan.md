@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P04
-status: verifying
+status: done
 derived_from:
   - P04-ci-cd.md
 owner: codex

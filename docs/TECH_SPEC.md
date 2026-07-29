@@ -391,7 +391,7 @@ server: {
 | Phase 1 — Traefik | ⬜ 待做 | `/srv/edge/compose.yml`、DNS |
 | Phase 2 — 應用 MVP | ✅ 完成 | `backend/` + `frontend/` |
 | Phase 3 — Dockerfile | ✅ 完成 | 單一 image，前端嵌入 static |
-| Phase 4 — GitHub Actions | 🟨 驗證中 | workflow、本地 lint/build 完成；待線上證據 |
+| Phase 4 — GitHub Actions | ✅ 完成 | PR build、GHCR 雙 tag publish、預設 deploy gate 已驗證 |
 | Phase 5 — VPS app | ⬜ 待做 | compose + `/srv/deploy.sh` |
 | Phase 6 — 線上驗收 | ⬜ 待做 | push → 2–4 分鐘看到新版 |
 

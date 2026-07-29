@@ -168,5 +168,14 @@ Local evidence:
 | `docker build -t obechow:p04-verification .` | Passed |
 | `git diff --check` | Passed |
 
-GitHub pull-request, GHCR publication, and VPS deployment evidence remain
-separate online gates and are not claimed by these local results.
+Online evidence:
+
+| Check | Result |
+|---|---|
+| PR run `30468132339` | `validate` success; `publish` and `deploy` skipped |
+| PR #1 squash merge | `2037ba806789f2cc3f1f9259194b740872b826f2` |
+| Main run `30469807025` | `publish` success; `validate` and `deploy` skipped |
+| GHCR tags | `latest` and full merge SHA point to digest `sha256:4949f2…e1174` |
+
+Phase 4 is complete. VPS provisioning, deploy secrets, and an enabled live
+deployment remain Phase 5/6 work.
