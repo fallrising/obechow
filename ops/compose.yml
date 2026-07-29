@@ -4,10 +4,12 @@ services:
     restart: unless-stopped
     environment:
       DB_PATH: /data/app.db
+      JAVA_TOOL_OPTIONS: -Dorg.sqlite.tmpdir=/sqlite-tmp
     volumes:
       - ./data:/data
     tmpfs:
-      - /tmp
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+      - /sqlite-tmp:rw,exec,nosuid,nodev,size=16m
     read_only: true
     security_opt:
       - no-new-privileges:true

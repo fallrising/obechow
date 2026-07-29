@@ -100,6 +100,7 @@ expected_sha = sys.argv[3]
 assert service["image"] == f"ghcr.io/fallrising/obechow:{expected_sha}"
 assert not service.get("ports")
 assert service["environment"]["DB_PATH"] == "/data/app.db"
+assert service["environment"]["JAVA_TOOL_OPTIONS"] == "-Dorg.sqlite.tmpdir=/sqlite-tmp"
 assert any(
     volume.get("type") == "bind"
     and os.path.realpath(volume.get("source", "")) == expected_data
@@ -118,7 +119,8 @@ assert labels["traefik.http.routers.twitter-deck.tls.certresolver"] == "le"
 assert labels["traefik.http.services.twitter-deck.loadbalancer.server.port"] == "8080"
 assert service["read_only"] is True
 assert "no-new-privileges:true" in service["security_opt"]
-assert "/tmp" in service["tmpfs"]
+assert "/tmp:rw,noexec,nosuid,nodev,size=64m" in service["tmpfs"]
+assert "/sqlite-tmp:rw,exec,nosuid,nodev,size=16m" in service["tmpfs"]
 assert service["logging"] == {
     "driver": "json-file",
     "options": {"max-file": "3", "max-size": "10m"},
