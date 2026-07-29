@@ -18,6 +18,7 @@ A minimal Twitter deck clone: horizontally scrollable columns for browsing and p
 ├── backend/     # Spring Boot REST API
 ├── frontend/    # Vite + React SPA
 ├── Dockerfile   # Single production image
+├── .github/     # Pull-request validation and main-branch delivery
 └── data/        # SQLite database (created at runtime, gitignored)
 ```
 
@@ -104,10 +105,20 @@ docker run --rm -p 8080:8080 \
 
 Open **http://localhost:8080**. The multi-stage build compiles the frontend into the Spring Boot JAR under `classpath:/static`; the final image contains only the JRE and application JAR. Non-API GET routes without a file extension forward to `index.html` for SPA routing.
 
+## Delivery workflow
+
+Pull requests build the production image without registry or SSH credentials.
+A push to `main` publishes both `latest` and an immutable full-commit-SHA tag to
+`ghcr.io/fallrising/obechow`. VPS deployment is disabled by default and runs
+only when the repository variable `DEPLOY_ENABLED` is exactly `true`.
+
+See the CI/CD runbook for the required SSH secrets and activation sequence.
+
 ## Documentation
 
 | Doc | Description |
 |-----|-------------|
 | [docs/TECH_SPEC.md](./docs/TECH_SPEC.md) | Architecture, tech choices, API spec, progress |
 | [docs/CI_CD_RUNBOOK.md](./docs/CI_CD_RUNBOOK.md) | Single-VPS deploy: `git push` → GHCR → SSH → Traefik |
+| [docs/sdd/README.md](./docs/sdd/README.md) | Specification-driven delivery nodes and verification |
 | [WORK_LOG.md](./WORK_LOG.md) | Build session history |

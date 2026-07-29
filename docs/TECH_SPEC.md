@@ -1,8 +1,8 @@
 # Obechow（Skan）技術方案
 
 > **Repo:** [github.com/fallrising/obechow](https://github.com/fallrising/obechow)  
-> **版本：** MVP v0.1  
-> **最後更新：** 2026-07-16
+> **版本：** MVP v0.2
+> **最後更新：** 2026-07-29
 
 ---
 
@@ -23,6 +23,7 @@ Obechow（代號 Skan）是一個**最小可行 Twitter Deck 克隆**：使用�
 | [README.md](../README.md) | 快速入門、API 速查 |
 | [WORK_LOG.md](../WORK_LOG.md) | 開發過程紀錄 |
 | [CI_CD_RUNBOOK.md](./CI_CD_RUNBOOK.md) | 部署操作手冊 |
+| [sdd/P04-ci-cd.md](./sdd/P04-ci-cd.md) | Phase 4 行為 contract 與驗收標準 |
 | 本文檔 | 技術架構、選型、規格、進度 |
 
 ---
@@ -390,7 +391,7 @@ server: {
 | Phase 1 — Traefik | ⬜ 待做 | `/srv/edge/compose.yml`、DNS |
 | Phase 2 — 應用 MVP | ✅ 完成 | `backend/` + `frontend/` |
 | Phase 3 — Dockerfile | ✅ 完成 | 單一 image，前端嵌入 static |
-| Phase 4 — GitHub Actions | ⬜ 待做 | `.github/workflows/deploy.yml` |
+| Phase 4 — GitHub Actions | 🟨 驗證中 | workflow、本地 lint/build 完成；待線上證據 |
 | Phase 5 — VPS app | ⬜ 待做 | compose + `/srv/deploy.sh` |
 | Phase 6 — 線上驗收 | ⬜ 待做 | push → 2–4 分鐘看到新版 |
 
@@ -446,5 +447,6 @@ flowchart TD
 
 | 日期 | 版本 | 變更 |
 |------|------|------|
+| 2026-07-29 | v0.2 | 以 P04 SDD 實作安全的 PR build、GHCR publish 與 gated deploy workflow |
 | 2026-07-16 | v0.1 | 完成 Phase 3：單一 Docker image 與 classpath static 驗證 |
 | 2026-07-13 | v0.1 | 初版：架構、選型、API、前端、進度總表 |

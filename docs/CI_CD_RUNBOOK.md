@@ -209,85 +209,51 @@ curl -s localhost:8080/api/health   # {"status":"ok"}
 
 ## Phase 4 — GitHub Actions → GHCR
 
-`.github/workflows/deploy.yml`：
+權威實作是 [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)，
+行為 contract 是 [`docs/sdd/P04-ci-cd.md`](./sdd/P04-ci-cd.md)：
 
-```yaml
-name: build-and-deploy
-on:
-  push:
-    branches: [main]
+| Event | Build | GHCR push | SSH deploy |
+|---|---|---|---|
+| Pull request | ✅ | ❌ | ❌ |
+| Push to `main`, deploy disabled | ✅ | `latest` + full SHA | skipped |
+| Push to `main`, deploy enabled | ✅ | `latest` + full SHA | exact full SHA |
 
-env:
-  IMAGE: ghcr.io/fallrising/obechow   # 必須全小寫
+Workflow-level token permission is `contents: read`; only the `publish` job gets
+`packages: write`. All actions use immutable commit SHAs. When upgrading an
+action, verify its official release, replace the full SHA and version comment
+together, then rerun `actionlint` and the production Docker build.
 
-permissions:
-  contents: read
-  packages: write
+### Repository variable and secrets
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ github.sha }}
+Create these under **Settings → Secrets and variables → Actions**:
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: /srv/deploy.sh twitter-deck ${{ github.sha }}
-```
-
-### SSH 鑰匙與 secrets
+| Type | Name | Purpose |
+|---|---|---|
+| Variable | `DEPLOY_ENABLED` | Exact value `true` enables deploy; keep absent/false until Phase 5 passes |
+| Secret | `SSH_HOST` | VPS hostname or IP |
+| Secret | `SSH_USER` | Dedicated deploy user |
+| Secret | `SSH_KEY` | Private half of the dedicated Ed25519 key |
+| Secret | `SSH_FINGERPRINT` | Trusted VPS host-key SHA256 fingerprint |
 
 ```bash
 # 本機產一把專用 deploy key
 ssh-keygen -t ed25519 -f deploy_key -C "gha-deploy" -N ""
 # 公鑰 → VPS 的 ~/.ssh/authorized_keys
 # 私鑰 → repo Settings → Secrets → SSH_KEY
-# 另外設 SSH_HOST（IP 或域名）、SSH_USER
+
+# 從可信管道核對 VPS 的 Ed25519 host public key，再計算 fingerprint。
+ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 ```
+
+不要只信任未驗證網路上的 `ssh-keyscan` 輸出；fingerprint 應從 VPS console
+或另一條可信管道取得。先保持 `DEPLOY_ENABLED=false`，完成 Phase 5 後才改
+為 `true`。
 
 ### Tailscale 變體
 
-SSH 只開在 tailnet 時，把 deploy job 換成：
-
-```yaml
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-      - uses: appleboy/ssh-action@v1
-        with:
-          host: <vps 的 MagicDNS 名或 100.x IP>
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: /srv/deploy.sh twitter-deck ${{ github.sha }}
-```
-
-**前置：** Tailscale admin 建 OAuth client（勾 `auth_keys` scope、綁 `tag:ci`），ACL 允許 `tag:ci` → VPS 的 22 port。runner 節點是 ephemeral，跑完自動消失。
+Tailscale 不在 P04 的凍結範圍。需要時另開 SDD node，加入官方
+Tailscale action、OAuth secrets、`tag:ci` ACL 與 ephemeral runner 驗收，
+並同樣以完整 commit SHA pin action。
 
 ### 選配加固
 
@@ -410,6 +376,6 @@ cd /srv/edge && docker compose logs -f
 | Phase 1 | ⬜ VPS 手動 | Traefik + DNS |
 | Phase 2 | ✅ 完成 | 本 repo 後端 + 前端 MVP |
 | Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
-| Phase 4 | ⬜ 待做 | `.github/workflows/deploy.yml` + secrets |
+| Phase 4 | 🟨 驗證中 | workflow 已實作並通過本地 gate；待 PR / `main` 線上證據 |
 | Phase 5 | ⬜ VPS 手動 | compose + `deploy.sh` + GHCR login |
 | Phase 6 | ⬜ 待驗收 | 首次 push → 線上看到新版 |
