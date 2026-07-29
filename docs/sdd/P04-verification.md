@@ -1,7 +1,7 @@
 ---
 document_type: verification-report
 node_id: P04
-status: local-passed
+status: pr-passed
 spec_revision: 1
 implementation_commit: 9152e5d6749feba17508159e669c3a8067676492
 workflow_sha256: 1ae32591a722a4f47ba80a6075f47ad486201d95bcd5b11d647595c79f6e7491
@@ -51,9 +51,22 @@ on the verification host.
 
 No unresolved local finding remains.
 
+## Pull request evidence
+
+[GitHub Actions run 30467866169](https://github.com/fallrising/obechow/actions/runs/30467866169)
+completed successfully for PR #1 at head `cff06a4`:
+
+| Job | Result |
+|---|---|
+| `validate` | success; checkout and production image build completed |
+| `publish` | skipped |
+| `deploy` | skipped |
+
+This closes P04-BDD-01 with online evidence and confirms that the pull-request
+path does not execute registry-login, image-push, or SSH steps.
+
 ## Pending online evidence
 
-- Pull request run builds without login, push, or SSH steps.
 - A `main` run publishes both GHCR tags.
 - With deploy disabled, the deploy job is skipped.
 - After Phase 5, an enabled deployment runs the exact published SHA on the VPS.

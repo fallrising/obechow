@@ -3,7 +3,7 @@ document_type: task
 id: P04-T02
 node_id: P04
 title: Review, document, and verify Phase 4
-status: verifying
+status: done
 depends_on:
   - P04-T01
 owner: codex
