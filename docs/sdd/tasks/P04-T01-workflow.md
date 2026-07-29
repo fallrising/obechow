@@ -3,7 +3,7 @@ document_type: task
 id: P04-T01
 node_id: P04
 title: Implement the build, publish, and deploy workflow
-status: todo
+status: done
 owner: opencode
 allowed_paths:
   - .github/workflows/deploy.yml

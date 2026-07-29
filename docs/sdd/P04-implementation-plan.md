@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P04
-status: ready
+status: verifying
 derived_from:
   - P04-ci-cd.md
 owner: codex
@@ -63,10 +63,10 @@ SQLite data are not modified by the repository change itself.
 
 ## Completion checklist
 
-- [ ] P04-T01 satisfies the frozen workflow contract.
-- [ ] Main-agent review has no unresolved finding.
-- [ ] `actionlint` passes.
-- [ ] Root Docker build passes.
-- [ ] Documentation matches the implemented secret and variable names.
-- [ ] Verification report records local evidence and clearly separates pending
+- [x] P04-T01 satisfies the frozen workflow contract after main-agent fixes.
+- [x] Main-agent review has no unresolved finding.
+- [x] `actionlint` passes.
+- [x] Root Docker build passes.
+- [x] Documentation matches the implemented secret and variable names.
+- [x] Verification report records local evidence and clearly separates pending
       GitHub/VPS evidence.

@@ -1,7 +1,7 @@
 ---
 id: P04
 title: GitHub Actions image publication and gated deployment
-status: ready
+status: verifying
 revision: 1
 baseline_commit: 2ef09e1
 depends_on:

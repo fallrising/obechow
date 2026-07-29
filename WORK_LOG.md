@@ -135,3 +135,38 @@ Verified the `obechow:dev` image locally:
 | `GET /` and `GET /deck` | Bundled `index.html` returned |
 | Hashed JavaScript asset | Served from the packaged JAR |
 | `POST /api/posts` + filtered `GET` | SQLite write/read round trip passed |
+
+---
+
+## 2026-07-29 — Phase 4 CI/CD workflow
+
+Established a lightweight SDD package before implementation:
+
+- froze pull-request, GHCR tagging, deploy gating, SSH trust, concurrency, and
+  permission contracts in `docs/sdd/P04-ci-cd.md`;
+- split implementation into delegated P04-T01 and main-agent P04-T02 review;
+- committed and pushed the specification before production workflow code.
+
+OpenCode implemented the first `.github/workflows/deploy.yml` draft within its
+single-file ownership boundary. Main-agent review rejected the draft unchanged
+because pull-request builds inherited `packages: write` and the runtime
+`drone-ssh` binary was not explicitly pinned. The adopted workflow:
+
+- separates credential-free pull-request validation from main-only publication;
+- publishes `latest` plus the immutable full Git SHA;
+- pins every action reference to a full commit SHA;
+- verifies the VPS host fingerprint and pins `drone-ssh` 1.8.2;
+- keeps deployment disabled unless `DEPLOY_ENABLED` is exactly `true`;
+- serializes production deploy jobs without cancelling an active deployment.
+
+Local evidence:
+
+| Check | Result |
+|---|---|
+| `actionlint .github/workflows/deploy.yml` | Passed |
+| Workflow contract assertions | Passed; seven action references pinned |
+| `docker build -t obechow:p04-verification .` | Passed |
+| `git diff --check` | Passed |
+
+GitHub pull-request, GHCR publication, and VPS deployment evidence remain
+separate online gates and are not claimed by these local results.
