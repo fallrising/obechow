@@ -376,6 +376,6 @@ cd /srv/edge && docker compose logs -f
 | Phase 1 | ⬜ VPS 手動 | Traefik + DNS |
 | Phase 2 | ✅ 完成 | 本 repo 後端 + 前端 MVP |
 | Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
-| Phase 4 | 🟨 驗證中 | workflow 已實作並通過本地 gate；待 PR / `main` 線上證據 |
+| Phase 4 | ✅ 完成 | PR build 與 `main` GHCR publish 已通過；deploy 預設 skipped |
 | Phase 5 | ⬜ VPS 手動 | compose + `deploy.sh` + GHCR login |
 | Phase 6 | ⬜ 待驗收 | 首次 push → 線上看到新版 |

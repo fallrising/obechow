@@ -1,10 +1,12 @@
 ---
 document_type: verification-report
 node_id: P04
-status: pr-passed
+status: passed
 spec_revision: 1
 implementation_commit: 9152e5d6749feba17508159e669c3a8067676492
+merge_commit: 2037ba806789f2cc3f1f9259194b740872b826f2
 workflow_sha256: 1ae32591a722a4f47ba80a6075f47ad486201d95bcd5b11d647595c79f6e7491
+published_image_digest: sha256:4949f200434630deed439f34ee6316888b1d2ec7b592d11e308968ae2ffe1174
 reviewer: codex
 verified_at: 2026-07-29
 ---
@@ -13,19 +15,20 @@ verified_at: 2026-07-29
 
 ## Conclusion
 
-The repository implementation passes every local gate and the delegated code
-has been reviewed and corrected. Pull-request execution, GHCR publication, and
-VPS deployment remain online gates; Phase 6 is not complete.
+The repository implementation passes every local gate, pull-request validation
+passes online, and the merged `main` workflow publishes both required GHCR tags
+while skipping deployment by default. P04 is complete. Live VPS deployment is
+owned by Phase 5/6 and is not claimed here.
 
 ## Requirement evidence
 
 | Requirement | Repository evidence | Result |
 |---|---|---|
-| PR build without credentials | separate `validate` job; workflow permissions are read-only | passed locally |
-| Main publishes `latest` and full SHA | `publish` job raw metadata tags | passed locally |
-| Deploy disabled by default | exact `DEPLOY_ENABLED == 'true'` job condition | passed locally |
-| Trusted exact deployment | fingerprint secret and full SHA remote command | passed locally |
-| Serialized deployment | `production-deploy`, `cancel-in-progress: false` | passed locally |
+| PR build without credentials | PR run executes only `validate` | passed online |
+| Main publishes `latest` and full SHA | main run pushes both tags to one digest | passed online |
+| Deploy disabled by default | main run reports `deploy` skipped | passed online |
+| Trusted exact deployment | fingerprint secret and full SHA remote command | contract passed; live gate deferred |
+| Serialized deployment | `production-deploy`, `cancel-in-progress: false` | contract passed; live gate deferred |
 | Immutable dependencies | seven action uses resolve to 40-character commit SHAs | passed locally |
 
 ## Commands
@@ -53,8 +56,8 @@ No unresolved local finding remains.
 
 ## Pull request evidence
 
-[GitHub Actions run 30467866169](https://github.com/fallrising/obechow/actions/runs/30467866169)
-completed successfully for PR #1 at head `cff06a4`:
+[GitHub Actions run 30468132339](https://github.com/fallrising/obechow/actions/runs/30468132339)
+completed successfully for PR #1 at final head `4f82956`:
 
 | Job | Result |
 |---|---|
@@ -65,8 +68,28 @@ completed successfully for PR #1 at head `cff06a4`:
 This closes P04-BDD-01 with online evidence and confirms that the pull-request
 path does not execute registry-login, image-push, or SSH steps.
 
-## Pending online evidence
+## Main publication evidence
 
-- A `main` run publishes both GHCR tags.
-- With deploy disabled, the deploy job is skipped.
-- After Phase 5, an enabled deployment runs the exact published SHA on the VPS.
+[GitHub Actions run 30469807025](https://github.com/fallrising/obechow/actions/runs/30469807025)
+completed successfully for merge commit
+`2037ba806789f2cc3f1f9259194b740872b826f2`:
+
+| Job | Result |
+|---|---|
+| `validate` | skipped |
+| `publish` | success; login, metadata, build, and push completed |
+| `deploy` | skipped |
+
+The publish log records both names on image digest
+`sha256:4949f200434630deed439f34ee6316888b1d2ec7b592d11e308968ae2ffe1174`:
+
+- `ghcr.io/fallrising/obechow:latest`
+- `ghcr.io/fallrising/obechow:2037ba806789f2cc3f1f9259194b740872b826f2`
+
+This closes P04-BDD-02 and P04-BDD-03 with online evidence.
+
+## Residual external gate
+
+After Phase 5 provisions the VPS and repository secrets, Phase 6 must enable
+deployment and prove the exact published SHA runs on the trusted host. P04
+deliberately does not create or mutate that external configuration.

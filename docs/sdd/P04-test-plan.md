@@ -1,7 +1,7 @@
 ---
 document_type: test-plan
 node_id: P04
-status: ready
+status: done
 derived_from:
   - P04-ci-cd.md
   - P04-implementation-plan.md
