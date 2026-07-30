@@ -24,6 +24,7 @@ Obechow（代號 Skan）是一個**最小可行 Twitter Deck 克隆**：使用�
 | [WORK_LOG.md](../WORK_LOG.md) | 開發過程紀錄 |
 | [CI_CD_RUNBOOK.md](./CI_CD_RUNBOOK.md) | 部署操作手冊 |
 | [sdd/P04-ci-cd.md](./sdd/P04-ci-cd.md) | Phase 4 行為 contract 與驗收標準 |
+| [sdd/P05-vps-deployment-bundle.md](./sdd/P05-vps-deployment-bundle.md) | Phase 5 VPS bundle contract 與驗收標準 |
 | 本文檔 | 技術架構、選型、規格、進度 |
 
 ---
@@ -172,7 +173,13 @@ obechow/
 │   └── package.json
 ├── docs/
 │   ├── TECH_SPEC.md             # 本文檔
-│   └── CI_CD_RUNBOOK.md
+│   ├── CI_CD_RUNBOOK.md
+│   └── sdd/                     # Phase contract、tasks、evidence
+├── ops/
+│   ├── compose.yml              # 單 VPS app desired state
+│   ├── .env.example             # operator configuration template
+│   └── deploy.sh                # exact-SHA health-gated deploy
+├── tests/ops/                   # deployment bundle contract tests
 ├── README.md
 └── WORK_LOG.md
 ```
@@ -392,7 +399,7 @@ server: {
 | Phase 2 — 應用 MVP | ✅ 完成 | `backend/` + `frontend/` |
 | Phase 3 — Dockerfile | ✅ 完成 | 單一 image，前端嵌入 static |
 | Phase 4 — GitHub Actions | ✅ 完成 | PR build、GHCR 雙 tag publish、預設 deploy gate 已驗證 |
-| Phase 5 — VPS app | ⬜ 待做 | compose + `/srv/deploy.sh` |
+| Phase 5 — VPS app bundle | ✅ Repo 完成 | versioned compose、exact-SHA deploy、42 項 assertions；VPS 安裝待 operator |
 | Phase 6 — 線上驗收 | ⬜ 待做 | push → 2–4 分鐘看到新版 |
 
 ### 7.3 文檔進度
@@ -419,6 +426,7 @@ server: {
 | TLS | Traefik + Let's Encrypt（HTTP-01 或 CF DNS-01） |
 | Deploy 觸發 | `push` to `main` |
 | Deploy 指令 | `/srv/deploy.sh twitter-deck <git-sha>` |
+| Runtime hardening | read-only root、`no-new-privileges`、bounded logs、SQLite 專用 exec tmpfs |
 
 ---
 
@@ -447,6 +455,7 @@ flowchart TD
 
 | 日期 | 版本 | 變更 |
 |------|------|------|
+| 2026-07-29 | v0.2 | 以 P05 SDD 建立可測試 single-VPS bundle、immutable health gate 與 read-only SQLite runtime |
 | 2026-07-29 | v0.2 | 以 P04 SDD 實作安全的 PR build、GHCR publish 與 gated deploy workflow |
 | 2026-07-16 | v0.1 | 完成 Phase 3：單一 Docker image 與 classpath static 驗證 |
 | 2026-07-13 | v0.1 | 初版：架構、選型、API、前端、進度總表 |
