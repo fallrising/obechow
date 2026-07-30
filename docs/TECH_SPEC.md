@@ -402,7 +402,7 @@ server: {
 | Phase 3 — Dockerfile | ✅ 完成 | 單一 image，前端嵌入 static |
 | Phase 4 — GitHub Actions | ✅ 完成 | PR build、GHCR 雙 tag publish、預設 deploy gate 已驗證 |
 | Phase 5 — VPS app bundle | ✅ Repo 完成 | versioned compose、exact-SHA deploy、42 項 assertions；VPS 安裝待 operator |
-| Phase 6 — rollout readiness | 🟡 驗證中 | 216 項 preflight assertions + isolated Docker rehearsal；live activation 待外部資料 |
+| Phase 6 — rollout readiness | ✅ Repo 完成 | 216 項 preflight assertions、isolated Docker rehearsal、PR/main publication；live activation 待外部資料 |
 
 ### 7.3 文檔進度
 
