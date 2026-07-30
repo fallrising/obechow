@@ -2,7 +2,7 @@
 task_id: P06-T04
 node_id: P06
 title: Review, document, verify, and deliver P06
-status: blocked
+status: ready
 owner: codex
 depends_on:
   - P06-T01 accepted
