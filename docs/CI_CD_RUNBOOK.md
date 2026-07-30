@@ -257,69 +257,77 @@ Tailscale action、OAuth secrets、`tag:ci` ACL 與 ephemeral runner 驗收，
 
 ### 選配加固
 
-限制這把 key 只能跑部署，在 VPS `authorized_keys` 該行前加：
-
-```
-command="/srv/deploy.sh twitter-deck \"$(echo $SSH_ORIGINAL_COMMAND | awk '{print $NF}')\"",no-port-forwarding,no-pty
-```
-
-MVP 階段可以先不管，打通再說。
+可在 dedicated deploy key 上先加 `no-port-forwarding,no-agent-forwarding,
+no-X11-forwarding,no-pty`。若要再加 forced command，必須另寫並測試只接受
+P05 exact command grammar 的 wrapper；不要在 `authorized_keys` 內用
+`awk`/command substitution 動態重組 `SSH_ORIGINAL_COMMAND`。
 
 ---
 
-## Phase 5 — VPS 端：app compose + deploy 腳本
+## Phase 5 — 版本化 VPS app bundle
 
-`/srv/apps/twitter-deck/compose.yml`：
+Repository-side bundle 已完成；權威檔案與行為 contract 是：
 
-```yaml
-services:
-  app:
-    image: ghcr.io/fallrising/obechow:${TAG:-latest}
-    restart: unless-stopped
-    environment:
-      - DB_PATH=/data/app.db
-    volumes:
-      - ./data:/data
-    networks:
-      - edge
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.tdeck.rule=Host(`deck.example.com`)
-      - traefik.http.routers.tdeck.entrypoints=websecure
-      - traefik.http.routers.tdeck.tls.certresolver=le
-      - traefik.http.services.tdeck.loadbalancer.server.port=8080
+- [`ops/compose.yml`](../ops/compose.yml) → `/srv/apps/twitter-deck/compose.yml`
+- [`ops/.env.example`](../ops/.env.example) → `/srv/apps/twitter-deck/.env`
+- [`ops/deploy.sh`](../ops/deploy.sh) → `/srv/deploy.sh`
+- [`docs/sdd/P05-vps-deployment-bundle.md`](./sdd/P05-vps-deployment-bundle.md)
 
-networks:
-  edge:
-    external: true
-```
+部署入口只接受 `twitter-deck <40 位小寫 hex commit SHA>`。它會先
+`docker compose config --quiet`，再只 pull/recreate `app` service，並用
+`--wait --wait-timeout 120` 等待健康；任何步驟失敗都不會印出成功訊息。
+它不接受 `latest`、任意 app/path，也不會 prune 主機的 image。
 
-`/srv/deploy.sh`：
+Compose bundle：
+
+- 不 publish host port，只經 external `edge` network 和 Traefik labels 對外；
+- 要求 operator 設定 `APP_HOST`，image repository 固定為本專案 GHCR；
+- 把 `./data` bind mount 到 `/data`，container replacement 不刪 SQLite；
+- root filesystem read-only，開啟 `no-new-privileges`，限制 json-file logs；
+- 一般 `/tmp` 保持 `noexec`；SQLite JDBC native library 只可從 16 MiB
+  `/sqlite-tmp` tmpfs 載入。
+
+### 安裝 reviewed bundle
+
+在 VPS 上 checkout 已通過 review 的 repository revision，然後：
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
+sudo install -d -m 0755 /srv/apps/twitter-deck/data
+sudo install -m 0644 ops/compose.yml /srv/apps/twitter-deck/compose.yml
+sudo install -m 0755 ops/deploy.sh /srv/deploy.sh
+sudo install -m 0600 ops/.env.example /srv/apps/twitter-deck/.env
+sudo chown -R "$USER":"$USER" /srv/apps/twitter-deck
+sudo chown "$USER":"$USER" /srv/deploy.sh
 
-APP="${1:?usage: deploy.sh <app> [tag]}"
-TAG="${2:-latest}"
-
-cd "/srv/apps/${APP}"
-export TAG
-docker compose pull
-docker compose up -d
-docker image prune -f
-
-echo "deployed ${APP} @ ${TAG}"
+# 把 placeholder 換成真正 hostname；TAG 會由 deploy.sh 以 exact SHA 覆蓋。
+editor /srv/apps/twitter-deck/.env
 ```
+
+`.env` 至少要有：
+
+```dotenv
+APP_HOST=deck.example.com
+TAG=0000000000000000000000000000000000000000
+```
+
+安裝前確認 Docker Compose 支援 `--wait`：
 
 ```bash
-chmod +x /srv/deploy.sh
+docker compose version
+docker compose up --help | grep -- --wait
 ```
+
+### Repository contract test
+
+任何 bundle 變更都先在 repository root 執行：
+
+```bash
+tests/ops/deployment_bundle_test.sh
+```
+
+它會用真實 Compose resolve model，再用 fake Docker 驗證成功順序、錯誤
+輸入零副作用、三種失敗停止點與禁止的 global/destructive 操作。這個 gate
+同時在 pull request 與 `main` publication job 的 image build 前執行。
 
 ### GHCR 拉取授權
 
@@ -331,14 +339,38 @@ echo <PAT> | docker login ghcr.io -u fallrising --password-stdin
 
 或者第一次 push 後把 package 設成 public，就免登入。
 
+### 首次手動驗證
+
+保持 repository variable `DEPLOY_ENABLED` 缺省或 `false`，先在 VPS 選一個
+已由 P04 發佈的完整 SHA：
+
+```bash
+/srv/deploy.sh twitter-deck <40 位小寫 hex commit SHA>
+cd /srv/apps/twitter-deck
+docker compose ps app
+docker compose logs --tail=100 app
+```
+
+只有在 container healthy、`https://<APP_HOST>/api/health` 回傳
+`{"status":"ok"}`、且 replacement 後資料仍存在，才進 Phase 6 啟用
+`DEPLOY_ENABLED=true`。
+
+回滾使用相同受限入口與舊的完整 SHA：
+
+```bash
+/srv/deploy.sh twitter-deck <舊的 40 位小寫 hex commit SHA>
+```
+
 ---
 
 ## Phase 6 — 首次部署與驗收
 
-1. `git push origin main`
-2. 看 Actions：build job 綠 → deploy job 綠（第一次若 deploy 比 VPS 設定先跑而失敗，補完 Phase 5 後 re-run 即可）
-3. 開 `https://deck.<網域>`，發一篇文
-4. **驗收核心：** 改一行前端文案 → push → 約 2–4 分鐘 → 重新整理看到變更。這條路通了，MVP 就算完成。
+1. 完成 Phase 0/1、安裝 P05 bundle、設定四個 SSH secrets。
+2. 用 exact SHA 完成一次手動健康與資料持久化驗證。
+3. 把 repository variable `DEPLOY_ENABLED` 設為 exact value `true`。
+4. `git push origin main`，確認 Actions 的 publish 與 deploy jobs 都成功。
+5. 開 `https://deck.<網域>`，發一篇文。
+6. **驗收核心：** 改一行前端文案 → push → 約 2–4 分鐘 → 重新整理看到變更。這條路通了，MVP 就算完成。
 
 ### 日常操作
 
@@ -349,8 +381,8 @@ cd /srv/apps/twitter-deck && docker compose logs -f
 # 看 Traefik 在幹嘛
 cd /srv/edge && docker compose logs -f
 
-# 回滾到任意舊版（GHCR 上每個 commit 都有 sha tag）
-/srv/deploy.sh twitter-deck <舊的 git sha>
+# 回滾到任意舊版（必須是 GHCR 已發佈的完整 40 位 commit SHA）
+/srv/deploy.sh twitter-deck <舊的完整 40 位 git sha>
 ```
 
 ---
@@ -361,7 +393,7 @@ cd /srv/edge && docker compose logs -f
 
 | 方向 | 說明 |
 |------|------|
-| **零停機** | 目前 `up -d` 是 recreate，有幾秒 downtime。下一步是 healthcheck + 起新殺舊（compose 的 `--wait` + 雙 replica，或 Traefik 權重切換）—— 自製 rolling update。 |
+| **零停機** | 目前已有 health-gated recreate，但仍可能有幾秒 downtime。下一步需雙 replica 加 Traefik 權重切換或 blue/green project。 |
 | **push 改 pull（GitOps）** | 把「Actions SSH 進來推」換成 VPS 上常駐 reconcile loop —— 定期比對 GHCR tag / git repo compose 與本機實際狀態，不一致就對齊。懶人現成品是 Watchtower。 |
 | **SQLite 備份** | Litestream 常駐複寫到 Cloudflare R2，一個 sidecar container 搞定，災難復原就是從 R2 restore。 |
 | **可觀測性** | 先上 Dozzle（看 log）+ Beszel（看資源），都是單容器級的輕量件。 |
@@ -377,5 +409,5 @@ cd /srv/edge && docker compose logs -f
 | Phase 2 | ✅ 完成 | 本 repo 後端 + 前端 MVP |
 | Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
 | Phase 4 | ✅ 完成 | PR build 與 `main` GHCR publish 已通過；deploy 預設 skipped |
-| Phase 5 | ⬜ VPS 手動 | compose + `deploy.sh` + GHCR login |
+| Phase 5 | ✅ Repo bundle | versioned compose、受限 `deploy.sh`、contract tests；VPS 安裝仍為手動 gate |
 | Phase 6 | ⬜ 待驗收 | 首次 push → 線上看到新版 |

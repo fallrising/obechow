@@ -1,7 +1,7 @@
 ---
 id: P05
 title: Versioned single-VPS deployment bundle
-status: implementing
+status: verifying
 revision: 1
 baseline_commit: ca66162
 depends_on:
@@ -51,7 +51,7 @@ application names or mutable image tags.
 | Failure | Return non-zero and never print a success message when validation, pull, or health fails |
 | Persistence | Bind `./data` to `/data`; keep SQLite outside the container lifecycle |
 | Ingress | Join external `edge`; expose no host port; configure Traefik from required `APP_HOST` |
-| Hardening | Use `no-new-privileges`, a read-only root filesystem, writable `/tmp`, and bounded logs |
+| Hardening | Use `no-new-privileges`, a read-only root, noexec general `/tmp`, a bounded executable SQLite-only tmpfs, and bounded logs |
 | Scope | Never prune images or mutate unrelated Docker services, networks, or volumes |
 
 The immutable SHA restriction is deliberate. `latest` remains a publication

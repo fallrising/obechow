@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P05
-status: implementing
+status: verifying
 derived_from:
   - P05-vps-deployment-bundle.md
 owner: codex
@@ -38,7 +38,9 @@ isolated test directory.
 
 The Compose service has no published ports. Traefik discovers it through
 labels on the external `edge` network. SQLite uses the app-local `data`
-directory; the root filesystem is read-only with `/tmp` as tmpfs.
+directory; the root filesystem is read-only. General `/tmp` is a bounded
+`noexec` tmpfs, while SQLite JDBC extracts its native library to the separate
+bounded `/sqlite-tmp` mount selected by `org.sqlite.tmpdir`.
 
 ## Task DAG and ownership
 
@@ -83,6 +85,7 @@ deletes the bind-mounted SQLite data directory.
 - [x] P05-T02 proves valid sequencing and invalid-input isolation after
       strengthening the resolved-model and failure-stop oracles.
 - [x] Compose model and workflow lint pass.
-- [ ] Production image passes health/read-only smoke verification.
-- [ ] Documentation replaces unsafe inline examples with versioned artifacts.
-- [ ] Verification report separates repository completion from live VPS work.
+- [x] Production image passes health/read-only smoke verification after a
+      dedicated executable SQLite tmpfs correction.
+- [x] Documentation replaces unsafe inline examples with versioned artifacts.
+- [x] Verification report separates repository completion from live VPS work.

@@ -1,7 +1,7 @@
 ---
 document_type: test-plan
 node_id: P05
-status: ready
+status: verifying
 derived_from:
   - P05-vps-deployment-bundle.md
   - P05-implementation-plan.md
@@ -50,8 +50,8 @@ The same test script runs before Docker build in both P04 workflow build paths.
 ## Main-agent smoke verification
 
 1. Build the production image with a local verification tag.
-2. Start it with a read-only root filesystem, writable `/tmp`, and a temporary
-   bind-mounted data directory.
+2. Start it with a read-only root filesystem, noexec general `/tmp`, a bounded
+   executable SQLite-only tmpfs, and a temporary bind-mounted data directory.
 3. Wait for Docker health and request `/api/health`.
 4. Confirm SQLite writes persist through a container replacement.
 5. Stop only the named verification containers; retain no test process.

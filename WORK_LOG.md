@@ -179,3 +179,49 @@ Online evidence:
 
 Phase 4 is complete. VPS provisioning, deploy secrets, and an enabled live
 deployment remain Phase 5/6 work.
+
+---
+
+## 2026-07-29 — Phase 5 versioned VPS deployment bundle
+
+Froze a second SDD node before implementation:
+
+- restricted production releases to `twitter-deck` plus an immutable full Git
+  SHA;
+- defined Compose preflight, service-scoped pull/recreate, bounded health wait,
+  persistent SQLite, Traefik-only ingress, and failure behavior;
+- excluded VPS mutation, credentials, live activation, global Docker cleanup,
+  zero downtime, and automated rollback.
+
+OpenCode implemented P05-T01 and P05-T02 inside their task path boundaries.
+Main-agent review rejected both drafts unchanged. Production-bundle corrections
+fixed the Traefik `Host()` matcher, prevented `.env` from overriding the image
+repository, aligned the `le` resolver, and removed `container_name`. Test
+corrections added an executable bit, exact Compose JSON assertions, required
+variable failures, a shell-like input case, and failure-stop command oracles.
+
+The accepted deployment contract test has 42 passing assertions and runs before
+the image build in both pull-request validation and `main` publication jobs.
+`actionlint` and whitespace checks pass.
+
+The first read-only image smoke exposed a real runtime issue: Docker mounted
+plain `/tmp` with `noexec`, while Xerial SQLite JDBC extracts and loads a native
+library from its temp directory. The corrected Compose model keeps general
+`/tmp` at `noexec` and provides only `/sqlite-tmp` as a bounded executable
+tmpfs through `-Dorg.sqlite.tmpdir=/sqlite-tmp`.
+
+Local runtime evidence after the correction:
+
+| Check | Result |
+|---|---|
+| Production image build | Passed; `sha256:a30e0777…b3f62b` |
+| Health under read-only root | Passed |
+| General `/tmp` | `noexec`, 64 MiB |
+| SQLite `/sqlite-tmp` | `exec`, 16 MiB |
+| POST then GET | Passed |
+| Container A → B replacement | id=1 post persisted in bind-mounted SQLite |
+
+Both named smoke containers and their temporary data directory were removed.
+The local verification image tag remains available. Actual VPS installation,
+DNS/Traefik checks, repository secrets, and `DEPLOY_ENABLED=true` remain Phase
+6 operator gates.

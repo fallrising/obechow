@@ -19,6 +19,8 @@ A minimal Twitter deck clone: horizontally scrollable columns for browsing and p
 ├── frontend/    # Vite + React SPA
 ├── Dockerfile   # Single production image
 ├── .github/     # Pull-request validation and main-branch delivery
+├── ops/         # Versioned single-VPS Compose and deploy entrypoint
+├── tests/ops/   # Hermetic deployment contract tests
 └── data/        # SQLite database (created at runtime, gitignored)
 ```
 
@@ -114,6 +116,18 @@ only when the repository variable `DEPLOY_ENABLED` is exactly `true`.
 
 See the CI/CD runbook for the required SSH secrets and activation sequence.
 
+The reviewed VPS bundle lives in `ops/`. It deploys only a full lowercase
+40-character Git SHA, waits for the container health check, keeps SQLite in a
+bind mount, and never prunes unrelated host resources. Validate it locally
+before installation:
+
+```bash
+tests/ops/deployment_bundle_test.sh
+```
+
+Repository Phase 5 does not install or mutate a VPS. Keep deployment disabled
+until the runbook's operator prerequisites and first manual verification pass.
+
 ## Documentation
 
 | Doc | Description |
@@ -121,4 +135,5 @@ See the CI/CD runbook for the required SSH secrets and activation sequence.
 | [docs/TECH_SPEC.md](./docs/TECH_SPEC.md) | Architecture, tech choices, API spec, progress |
 | [docs/CI_CD_RUNBOOK.md](./docs/CI_CD_RUNBOOK.md) | Single-VPS deploy: `git push` → GHCR → SSH → Traefik |
 | [docs/sdd/README.md](./docs/sdd/README.md) | Specification-driven delivery nodes and verification |
+| [docs/sdd/P05-vps-deployment-bundle.md](./docs/sdd/P05-vps-deployment-bundle.md) | Immutable VPS bundle behavior and acceptance contract |
 | [WORK_LOG.md](./WORK_LOG.md) | Build session history |
