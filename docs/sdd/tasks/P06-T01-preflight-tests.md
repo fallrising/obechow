@@ -2,7 +2,7 @@
 task_id: P06-T01
 node_id: P06
 title: Add RED rollout-preflight contract tests
-status: ready
+status: done
 owner: grok
 reviewer: codex
 depends_on:

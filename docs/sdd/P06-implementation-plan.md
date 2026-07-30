@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P06
-status: ready
+status: implementing
 derived_from:
   - P06-rollout-readiness.md
 owner: codex
@@ -105,8 +105,8 @@ Codex reviews every line and may reject or rewrite the result.
 
 ## Completion checklist
 
-- [ ] RED failure observed for the missing preflight.
-- [ ] Delegated tests accepted after line review.
+- [x] RED failure observed for the missing preflight.
+- [x] Delegated tests accepted after main-agent corrections.
 - [ ] Delegated implementation accepted after security review.
 - [ ] P05 and P06 contract suites pass.
 - [ ] Local real-Docker replacement rehearsal passes and cleans up.
