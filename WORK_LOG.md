@@ -225,3 +225,15 @@ Both named smoke containers and their temporary data directory were removed.
 The local verification image tag remains available. Actual VPS installation,
 DNS/Traefik checks, repository secrets, and `DEPLOY_ENABLED=true` remain Phase
 6 operator gates.
+
+Online closure evidence:
+
+| Check | Result |
+|---|---|
+| PR #3 final run `30502401062` | `validate` success; tests and image build passed |
+| PR #3 squash merge | `a15c589bdabc01dff55824f5008dd4bd3fa26566` |
+| Main run `30502496740` | `publish` success; 42 assertions passed; deploy skipped |
+| GHCR tags | `latest` and full merge SHA → `sha256:ab8210…88942` |
+
+P05 repository work is complete. The deliberately separate Phase 6 external
+gate is the first trusted-host installation and enabled end-to-end deployment.

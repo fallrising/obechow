@@ -1,7 +1,7 @@
 ---
 document_type: test-plan
 node_id: P05
-status: verifying
+status: done
 derived_from:
   - P05-vps-deployment-bundle.md
   - P05-implementation-plan.md
