@@ -1,10 +1,13 @@
 ---
 document_type: verification-report
 node_id: P05
-status: local-passed
+status: pr-passed
 spec_revision: 1
 implementation_commit: 42282bdc113f65d5ef5871bbf098ef01a92c7f29
 merge_commit: pending
+pull_request: 3
+pr_validation_commit: cb2be5cbb5047341458789d41132a3ea5430f3f6
+pr_validation_run: 30501994218
 compose_sha256: 9103396c54617315f98aed5924fbdfe627461fb196ed28586a669be338e2e43e
 deploy_sha256: 6f36d211195b065119cea765622b097105b156e40562be578b1f38b366b966be
 test_sha256: 61f925c67fbca617b71ad6bf601575d55762b1648530fb0549cd92b0985672a9
@@ -18,9 +21,9 @@ verified_at: 2026-07-29
 
 ## Current conclusion
 
-All repository and local runtime gates pass. The deployment bundle remains in
-`verifying` until its pull-request workflow passes and the implementation is
-merged. No VPS installation or live deployment is claimed.
+All repository, local runtime, and pull-request gates pass. The deployment
+bundle remains in `verifying` until the implementation is merged. No VPS
+installation or live deployment is claimed.
 
 ## Requirement evidence
 
@@ -31,7 +34,7 @@ merged. No VPS installation or live deployment is claimed.
 | Failure propagation | config, pull, and up failures stop at the failing command | passed locally |
 | Persistent private service | resolved Compose JSON plus A→B SQLite replacement | passed locally |
 | Bounded production scope | service-scoped commands and forbidden-operation assertions | passed locally |
-| CI regression gate | identical test step precedes both workflow image builds | passed lint; online pending |
+| CI regression gate | identical test step precedes both workflow image builds | passed online |
 
 ## Commands
 
@@ -80,12 +83,18 @@ directory were then removed.
 
 ## Online gate
 
-Pending:
+[GitHub Actions run 30501994218](https://github.com/fallrising/obechow/actions/runs/30501994218)
+completed successfully for PR #3 at head
+`cb2be5cbb5047341458789d41132a3ea5430f3f6`:
 
-1. open the P05 pull request;
-2. confirm the PR `validate` job runs the contract test and image build;
-3. merge the reviewed implementation;
-4. record the merge and `main` workflow evidence in the closure report update.
+| Job | Result |
+|---|---|
+| `validate` | success; deployment tests and production image build passed |
+| `publish` | skipped |
+| `deploy` | skipped |
+
+The remaining repository gate is to merge the reviewed implementation and
+record the merge plus `main` workflow evidence in the closure report update.
 
 Actual VPS installation, Traefik/DNS reachability, SSH secrets, and enabling
 `DEPLOY_ENABLED` remain Phase 6 external work.
