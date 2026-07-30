@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P06
-status: verifying
+status: done
 derived_from:
   - P06-rollout-readiness.md
 owner: codex
@@ -111,5 +111,5 @@ Codex reviews every line and may reject or rewrite the result.
 - [x] P05 and P06 contract suites pass locally.
 - [x] Local real-Docker replacement rehearsal passes and cleans up.
 - [x] Workflow and documentation match the SDD locally.
-- [ ] PR and merged-main checks pass.
+- [x] PR and merged-main checks pass.
 - [x] No live VPS or enabled deployment is claimed.

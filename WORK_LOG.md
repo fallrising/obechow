@@ -278,6 +278,18 @@ Accepted local evidence:
 | Runtime hardening | read-only root, no host ports, `no-new-privileges`, exact tmpfs and bind settings |
 | Cleanup | no rehearsal container, network, image tag, temp bind, or `ops/data` remained |
 
-The pull-request and merged-main workflow evidence is pending. No VPS, SSH,
-DNS, Traefik, GitHub secret/variable, GHCR visibility, or production deployment
-was changed or verified by this work.
+Online closure evidence:
+
+| Check | Result |
+|---|---|
+| PR #5 head | `ddd0aac07e0437074671abb2262379e53b73e1ff` |
+| PR #5 run `30534555874` | `validate` success; P05/P06 tests and production image build passed; publish/deploy skipped |
+| PR #5 squash merge | `58b21438567bedead154fc2d50e3c3bc3cdc696f` |
+| Main run `30534658841` | `publish` success; P05/P06 tests and image push passed; deploy skipped |
+| Immutable GHCR image | full merge SHA → `sha256:aff3e256c67a…e49fb628` |
+
+P06 repository readiness is complete. No VPS, SSH, DNS, Traefik, GitHub
+secret/variable, package visibility, or production deployment was changed or
+verified by this work. `DEPLOY_ENABLED` remains an external gate and must stay
+absent or exactly `false` until the documented manual exact-SHA smoke and
+rollback evidence exists.

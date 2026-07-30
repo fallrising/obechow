@@ -1,18 +1,31 @@
 ---
 document_type: verification-report
 node_id: P06
-status: verifying
+status: passed
 spec_revision: 2
+implementation_commit: ecc90e6186341ef3d8d5454121dea60a777e598f
+merge_commit: 58b21438567bedead154fc2d50e3c3bc3cdc696f
+pull_request: 5
+pr_validation_commit: ddd0aac07e0437074671abb2262379e53b73e1ff
+pr_validation_run: 30534555874
+main_validation_run: 30534658841
+published_image_id: sha256:fba16ea878f2d344d4315cff11e010ca811cf18cb02e4006a0d3e7e394fc8e6d
+published_image_digest: sha256:aff3e256c67aec56cb06482e62070e0344ab5f610e8f04d3add7fe86e49fb628
+preflight_sha256: d559daafbda8019972ddb44c4dd296b2ebfb3a7fa118cfef48a7dd9dc4369a7b
+preflight_test_sha256: fe6dddfde1409db71ca869543e63fef93ba7f54e03753cb654ff492df0f5120d
+rehearsal_test_sha256: 3daf3defcc6a30aab9b28ed12105bd3296b5161a66c311fc2cb5ab4d7b712951
+workflow_sha256: 15c18bbe34c6a2a12d78746d9f368849564e3a04f1852ae5a3e0419872264b8b
 reviewer: codex
+verified_at: 2026-07-30
 ---
 
 # P06 verification report
 
 ## Current conclusion
 
-All repository and local runtime gates pass. Pull-request and merged-main
-workflow evidence is still pending. No VPS installation or live deployment is
-claimed.
+All repository, local runtime, pull-request, merge, and `main` publication
+gates pass. P06 repository readiness is complete. No VPS installation or live
+deployment is claimed.
 
 ## Evidence ledger
 
@@ -24,7 +37,7 @@ claimed.
 | DNS and immutable manifest checks | exact value and failure-prefix assertions | passed locally |
 | Read-only command scope | exact allow-listed success log | passed locally |
 | Local Docker replacement | isolated A-to-B Compose rehearsal | passed locally |
-| Pull-request and merged-main workflow | pending | pending |
+| Pull-request and merged-main workflow | PR run `30534555874`; main run `30534658841` | passed |
 
 ## Local commands
 
@@ -79,6 +92,21 @@ containers reported:
 The bind contained `app.db`, `app.db-shm`, and `app.db-wal`. Exact cleanup and
 independent post-run queries found no rehearsal container, network, image tag,
 temporary directory, or repository `ops/data` directory.
+
+## GitHub evidence
+
+| Check | Result |
+|---|---|
+| PR #5 head | `ddd0aac07e0437074671abb2262379e53b73e1ff` |
+| PR #5 run `30534555874` | `validate` passed, including both contract suites and the production image build; `publish` and `deploy` skipped |
+| PR #5 squash merge | `58b21438567bedead154fc2d50e3c3bc3cdc696f` |
+| Main run `30534658841` | `publish` passed, including both contract suites and image push; `validate` and `deploy` skipped |
+| Immutable image | `ghcr.io/fallrising/obechow:58b21438567bedead154fc2d50e3c3bc3cdc696f` |
+| Registry digest | `sha256:aff3e256c67aec56cb06482e62070e0344ab5f610e8f04d3add7fe86e49fb628` |
+
+The main publication also updated `latest`, but deployment and rollback
+contracts use only the immutable full-SHA tag. The skipped deploy job is
+evidence that repository publication did not contact or modify a VPS.
 
 ## External activation gate
 

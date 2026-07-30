@@ -498,4 +498,4 @@ cd /srv/edge && docker compose logs -f
 | Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
 | Phase 4 | ✅ 完成 | PR build 與 `main` GHCR publish 已通過；deploy 預設 skipped |
 | Phase 5 | ✅ Repo bundle | versioned compose、受限 `deploy.sh`、contract tests；VPS 安裝仍為手動 gate |
-| Phase 6 | 🟡 Repo readiness 驗證中 | read-only preflight、216 assertions、local Docker rehearsal；live activation 仍需外部資料 |
+| Phase 6 | ✅ Repo readiness | read-only preflight、216 assertions、local Docker rehearsal、PR/main publication；live activation 仍需外部資料 |

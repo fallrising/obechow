@@ -1,7 +1,7 @@
 ---
 document_type: test-plan
 node_id: P06
-status: ready
+status: done
 derived_from:
   - P06-rollout-readiness.md
   - P06-implementation-plan.md

@@ -28,4 +28,4 @@ after its verification report is committed with reproducible evidence.
 |---|---|---|
 | [P04](./P04-ci-cd.md) | done | GHCR publication and disabled-by-default SSH workflow |
 | [P05](./P05-vps-deployment-bundle.md) | done | immutable single-VPS bundle without host mutation |
-| [P06](./P06-rollout-readiness.md) | verifying | read-only host preflight and isolated local rehearsal; no live rollout |
+| [P06](./P06-rollout-readiness.md) | done | read-only host preflight and isolated local rehearsal; no live rollout |
