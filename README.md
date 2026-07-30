@@ -128,6 +128,21 @@ tests/ops/deployment_bundle_test.sh
 Repository Phase 5 does not install or mutate a VPS. Keep deployment disabled
 until the runbook's operator prerequisites and first manual verification pass.
 
+Phase 6 repository readiness adds a read-only host preflight and an isolated
+local Docker rehearsal:
+
+```bash
+tests/ops/rollout_preflight_test.sh
+tests/ops/rollout_rehearsal_test.sh
+```
+
+The host preflight verifies reviewed bundle identity, Docker/Compose
+capability, the `edge` network, Traefik resolver `le`, exact DNS, and both
+release and rollback full-SHA manifests without deploying. The Docker
+rehearsal proves local replacement and SQLite persistence only; neither command
+is evidence of a real VPS rollout. Keep `DEPLOY_ENABLED=false` until the
+runbook's external gate is complete.
+
 ## Documentation
 
 | Doc | Description |
@@ -136,4 +151,5 @@ until the runbook's operator prerequisites and first manual verification pass.
 | [docs/CI_CD_RUNBOOK.md](./docs/CI_CD_RUNBOOK.md) | Single-VPS deploy: `git push` → GHCR → SSH → Traefik |
 | [docs/sdd/README.md](./docs/sdd/README.md) | Specification-driven delivery nodes and verification |
 | [docs/sdd/P05-vps-deployment-bundle.md](./docs/sdd/P05-vps-deployment-bundle.md) | Immutable VPS bundle behavior and acceptance contract |
+| [docs/sdd/P06-rollout-readiness.md](./docs/sdd/P06-rollout-readiness.md) | Read-only first-rollout preflight and external activation boundary |
 | [WORK_LOG.md](./WORK_LOG.md) | Build session history |

@@ -237,3 +237,47 @@ Online closure evidence:
 
 P05 repository work is complete. The deliberately separate Phase 6 external
 gate is the first trusted-host installation and enabled end-to-end deployment.
+
+---
+
+## 2026-07-30 — Phase 6 rollout readiness
+
+Verified the starting state before implementation:
+
+- local and remote `main` matched
+  `4721ed72f1398f1698980725ec1e98786eaa2f9d`;
+- PR #3 and PR #4 were merged;
+- workflow run `30516206314` published successfully and skipped deployment;
+- the working tree was clean and no newer roadmap node existed;
+- Docker 27.5.1 and an authenticated Grok CLI 0.2.114 were available.
+
+P06 deliberately separates repository readiness from live activation. Its
+scope is a read-only target-host preflight, hermetic failure contracts, and an
+isolated local Docker rehearsal. VPS access, DNS changes, secrets, repository
+settings, `DEPLOY_ENABLED=true`, and claims of public deployment remain outside
+this repository phase.
+
+Grok received one bounded file scope at a time. Main-agent review rejected
+drafts unchanged where necessary:
+
+| Slice | Main-agent finding | Resolution |
+|---|---|---|
+| RED contract | mutation oracle rejected required `compose up --help`; weak Traefik/network checks; ineffective missing-env helper | exact 15-command allow-list, typed container inspect, exact edge NetworkID, corrected env isolation |
+| Preflight | leading-hyphen container value could be parsed as an option; empty overrides silently used defaults; invalid arity called external `basename` | alphanumeric container prefix, strict empty/relative path rejection, builtin-only early validation |
+| Docker rehearsal | partial failed `up --wait` could bypass cleanup; ports/network/RW/tmpfs checks were incomplete | arm project cleanup before `up`, inspect full A/B runtime contract, verify exact residual absence |
+
+Accepted local evidence:
+
+| Check | Result |
+|---|---|
+| P05 deployment bundle contract | 42 passed, 0 failed |
+| P06 rollout preflight contract | 216 passed, 0 failed |
+| `actionlint` | passed |
+| Compose model resolution | passed |
+| Isolated Docker replacement | healthy A→B; id=1 author/content persisted |
+| Runtime hardening | read-only root, no host ports, `no-new-privileges`, exact tmpfs and bind settings |
+| Cleanup | no rehearsal container, network, image tag, temp bind, or `ops/data` remained |
+
+The pull-request and merged-main workflow evidence is pending. No VPS, SSH,
+DNS, Traefik, GitHub secret/variable, GHCR visibility, or production deployment
+was changed or verified by this work.

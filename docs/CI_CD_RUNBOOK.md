@@ -365,12 +365,100 @@ docker compose logs --tail=100 app
 
 ## Phase 6 — 首次部署與驗收
 
-1. 完成 Phase 0/1、安裝 P05 bundle、設定四個 SSH secrets。
-2. 用 exact SHA 完成一次手動健康與資料持久化驗證。
-3. 把 repository variable `DEPLOY_ENABLED` 設為 exact value `true`。
-4. `git push origin main`，確認 Actions 的 publish 與 deploy jobs 都成功。
-5. 開 `https://deck.<網域>`，發一篇文。
-6. **驗收核心：** 改一行前端文案 → push → 約 2–4 分鐘 → 重新整理看到變更。這條路通了，MVP 就算完成。
+P06 先把「repository 已準備好」和「真的改 production」拆成兩個 gate。
+前者可以在沒有 VPS 資料時驗證；後者一定要有 operator 授權及線上證據。
+
+### Repository readiness
+
+每個 PR 與 `main` publication 都會在 image build 前執行：
+
+```bash
+tests/ops/deployment_bundle_test.sh
+tests/ops/rollout_preflight_test.sh
+```
+
+需要重做完整 runtime rehearsal 時，在 Linux Docker host 執行：
+
+```bash
+tests/ops/rollout_rehearsal_test.sh
+```
+
+Rehearsal 會建立唯一的 Compose project、bridge network、temporary SQLite
+bind 與 synthetic full-SHA local tag，驗證 healthy A→B replacement、runtime
+hardening 和資料持久化後，只移除自己建立的資源。它不會 pull app image、
+publish port、接觸 VPS/DNS/GitHub，也不能作為 live deployment 證據。
+
+### 外部輸入 gate
+
+開始任何 VPS、DNS、secret、repository setting 或 deployment 變更前，
+operator 必須提供並核對：
+
+| 類別 | 必要資料／證據 |
+|---|---|
+| SSH | VPS host、port、dedicated user、可用 key、可信管道取得的 Ed25519 host fingerprint |
+| Route | 正式 `APP_HOST`、VPS public IPv4、DNS A record exact match |
+| Traefik | running container name、external `edge` attachment、ACME resolver `le` |
+| Images | candidate release full SHA、不同的 rollback full SHA、兩者 GHCR read access |
+| GitHub | `SSH_HOST`、`SSH_USER`、`SSH_KEY`、`SSH_FINGERPRINT` 權限及 environment/repository 管理授權 |
+| Window | operator、手動 smoke 步驟、可接受 downtime、rollback window |
+
+在資料未齊前，`DEPLOY_ENABLED` 必須維持缺省或 exact value `false`。
+
+### Target-host read-only preflight
+
+先安裝 P05 bundle，但不要呼叫 deploy。從與 candidate code 相同、已 review
+的 repository checkout 在 VPS 上執行：
+
+```bash
+APP_HOST=<正式 hostname> \
+EXPECTED_DNS_IPV4=<VPS public IPv4> \
+TRAEFIK_CONTAINER=<running Traefik container name> \
+ops/rollout-preflight.sh \
+  twitter-deck \
+  <candidate 40 位小寫 hex SHA> \
+  <rollback 40 位小寫 hex SHA>
+```
+
+Preflight 會先驗證所有輸入，再 byte-compare checkout 與 `/srv` 內的
+Compose/deploy bundle；之後只做 Docker/Compose capability、`edge`、
+Traefik `le` resolver、resolved service/image、DNS A record、release 與
+rollback manifest 的 read-only 檢查。成功訊息必須明示
+`No deployment performed`。它不會執行 deploy、pull、up/down、login、
+network mutation 或 prune。
+
+### 首次手動 exact-SHA smoke
+
+Preflight 全綠後仍保持 `DEPLOY_ENABLED=false`，由 operator 在 rollback
+window 內執行：
+
+```bash
+/srv/deploy.sh twitter-deck <candidate full SHA>
+cd /srv/apps/twitter-deck
+docker compose ps app
+docker compose logs --tail=100 app
+```
+
+接著必須從外部確認：
+
+1. `https://<APP_HOST>/api/health` exact 回傳 `{"status":"ok"}`；
+2. 建立一筆帶唯一識別值的 post，記錄 id/author/content；
+3. 再以相同 candidate SHA 執行一次 replacement；
+4. replacement healthy 後讀回相同 id/author/content；
+5. 用 rollback SHA 執行相同入口時，operator 能在 window 內恢復。
+
+只有上述 exact-SHA 手動 smoke 與 rollback 能力有可驗證證據後，才可在
+另一次已授權操作把 `DEPLOY_ENABLED` 設為 exact value `true`。
+
+### GitHub Actions live acceptance
+
+1. `git push origin main`，確認 `publish` 成功且 `deploy` 實際執行成功。
+2. 核對 workflow SHA、GHCR candidate tag 與 VPS running image 完全相同。
+3. 開 `https://<APP_HOST>`，確認 API、SPA、TLS 與資料仍正常。
+4. **驗收核心：** 改一行可識別前端文案 → push → 約 2–4 分鐘 → 重新整理
+   看到同一 commit 的變更。
+
+在取得 Actions 與 public HTTPS 證據前，不得宣稱 Phase 6 live activation
+完成。
 
 ### 日常操作
 
@@ -410,4 +498,4 @@ cd /srv/edge && docker compose logs -f
 | Phase 3 | ✅ 完成 | `Dockerfile`、`.dockerignore`；本地 image smoke test 通過 |
 | Phase 4 | ✅ 完成 | PR build 與 `main` GHCR publish 已通過；deploy 預設 skipped |
 | Phase 5 | ✅ Repo bundle | versioned compose、受限 `deploy.sh`、contract tests；VPS 安裝仍為手動 gate |
-| Phase 6 | ⬜ 待驗收 | 首次 push → 線上看到新版 |
+| Phase 6 | 🟡 Repo readiness 驗證中 | read-only preflight、216 assertions、local Docker rehearsal；live activation 仍需外部資料 |
