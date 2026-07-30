@@ -21,3 +21,11 @@ review the node spec before changing production files.
 
 No implementation task starts before its node is `ready`. A node is `done` only
 after its verification report is committed with reproducible evidence.
+
+## Delivery nodes
+
+| Node | Status | Boundary |
+|---|---|---|
+| [P04](./P04-ci-cd.md) | done | GHCR publication and disabled-by-default SSH workflow |
+| [P05](./P05-vps-deployment-bundle.md) | done | immutable single-VPS bundle without host mutation |
+| [P06](./P06-rollout-readiness.md) | verifying | read-only host preflight and isolated local rehearsal; no live rollout |

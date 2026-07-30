@@ -1,7 +1,7 @@
 ---
 id: P06
 title: First-rollout readiness preflight
-status: implementing
+status: verifying
 revision: 2
 baseline_commit: 4721ed72f1398f1698980725ec1e98786eaa2f9d
 depends_on:

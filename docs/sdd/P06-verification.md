@@ -1,7 +1,7 @@
 ---
 document_type: verification-report
 node_id: P06
-status: pending
+status: verifying
 spec_revision: 2
 reviewer: codex
 ---
@@ -10,7 +10,8 @@ reviewer: codex
 
 ## Current conclusion
 
-Verification has not started. No VPS installation or live deployment is
+All repository and local runtime gates pass. Pull-request and merged-main
+workflow evidence is still pending. No VPS installation or live deployment is
 claimed.
 
 ## Evidence ledger
@@ -24,6 +25,36 @@ claimed.
 | Read-only command scope | exact allow-listed success log | passed locally |
 | Local Docker replacement | isolated A-to-B Compose rehearsal | passed locally |
 | Pull-request and merged-main workflow | pending | pending |
+
+## Local commands
+
+```text
+bash -n ops/rollout-preflight.sh
+bash -n tests/ops/rollout_preflight_test.sh
+bash -n tests/ops/rollout_rehearsal_test.sh
+tests/ops/deployment_bundle_test.sh
+tests/ops/rollout_preflight_test.sh
+tests/ops/rollout_rehearsal_test.sh
+docker compose --env-file ops/.env.example -f ops/compose.yml config --quiet
+/tmp/actionlint .github/workflows/deploy.yml
+git diff --check
+```
+
+All commands exited zero. The contract suites reported 42 P05 assertions and
+216 P06 assertions.
+
+## Delegated review findings
+
+| Severity | Finding | Resolution |
+|---|---|---|
+| high | failed `compose up --wait` could leave a partial rehearsal project because cleanup was armed only after success | arm exact-project cleanup before the first `up` |
+| medium | preflight accepted a leading-hyphen Traefik name at a Docker option boundary | require an alphanumeric first character |
+| medium | empty test path overrides silently selected production defaults | distinguish unset from empty and reject empty/relative paths |
+| medium | delegated RED mutation oracle rejected the required read-only `compose up --help` | exact allow-list plus mutation-specific rejection |
+| medium | initial Traefik/edge assertions used weak name output and omitted container typing | exact `--type container`, network name, NetworkID, and resolver argument checks |
+| low | rehearsal initially omitted host-port, writable-bind, unique-network, and full tmpfs runtime values | inspect and assert the complete contract for both containers |
+
+No delegated finding remains unresolved.
 
 ## Local Docker rehearsal evidence
 

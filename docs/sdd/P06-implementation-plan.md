@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P06
-status: implementing
+status: verifying
 derived_from:
   - P06-rollout-readiness.md
 owner: codex
@@ -110,6 +110,6 @@ Codex reviews every line and may reject or rewrite the result.
 - [x] Delegated implementation accepted after main-agent security corrections.
 - [x] P05 and P06 contract suites pass locally.
 - [x] Local real-Docker replacement rehearsal passes and cleans up.
-- [ ] Workflow and documentation match the SDD.
+- [x] Workflow and documentation match the SDD locally.
 - [ ] PR and merged-main checks pass.
-- [ ] No live VPS or enabled deployment is claimed.
+- [x] No live VPS or enabled deployment is claimed.
