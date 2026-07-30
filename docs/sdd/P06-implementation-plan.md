@@ -109,7 +109,7 @@ Codex reviews every line and may reject or rewrite the result.
 - [x] Delegated tests accepted after main-agent corrections.
 - [x] Delegated implementation accepted after main-agent security corrections.
 - [x] P05 and P06 contract suites pass locally.
-- [ ] Local real-Docker replacement rehearsal passes and cleans up.
+- [x] Local real-Docker replacement rehearsal passes and cleans up.
 - [ ] Workflow and documentation match the SDD.
 - [ ] PR and merged-main checks pass.
 - [ ] No live VPS or enabled deployment is claimed.
