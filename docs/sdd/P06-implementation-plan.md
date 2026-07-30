@@ -107,8 +107,8 @@ Codex reviews every line and may reject or rewrite the result.
 
 - [x] RED failure observed for the missing preflight.
 - [x] Delegated tests accepted after main-agent corrections.
-- [ ] Delegated implementation accepted after security review.
-- [ ] P05 and P06 contract suites pass.
+- [x] Delegated implementation accepted after main-agent security corrections.
+- [x] P05 and P06 contract suites pass locally.
 - [ ] Local real-Docker replacement rehearsal passes and cleans up.
 - [ ] Workflow and documentation match the SDD.
 - [ ] PR and merged-main checks pass.

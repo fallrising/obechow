@@ -342,12 +342,12 @@ run_preflight() {
     FAKE_EDGE_NETWORK_ID="$FAKE_EDGE_NETWORK_ID" \
     FAKE_RELEASE_SHA="$RELEASE_SHA" \
     FAKE_ROLLBACK_SHA="$ROLLBACK_SHA" \
-    APP_HOST="${CASE_APP_HOST:-$APP_HOST}" \
-    EXPECTED_DNS_IPV4="${CASE_DNS:-$EXPECTED_DNS_IPV4}" \
-    TRAEFIK_CONTAINER="${CASE_TRAEFIK:-$TRAEFIK_CONTAINER}" \
-    OBECHOW_SOURCE_ROOT="${CASE_SOURCE:-$SOURCE_ROOT}" \
-    OBECHOW_DEPLOY_ROOT="${CASE_DEPLOY_ROOT:-$DEPLOY_ROOT}" \
-    OBECHOW_DEPLOY_SCRIPT="${CASE_DEPLOY_SCRIPT:-$DEPLOY_SCRIPT}" \
+    APP_HOST="${CASE_APP_HOST-$APP_HOST}" \
+    EXPECTED_DNS_IPV4="${CASE_DNS-$EXPECTED_DNS_IPV4}" \
+    TRAEFIK_CONTAINER="${CASE_TRAEFIK-$TRAEFIK_CONTAINER}" \
+    OBECHOW_SOURCE_ROOT="${CASE_SOURCE-$SOURCE_ROOT}" \
+    OBECHOW_DEPLOY_ROOT="${CASE_DEPLOY_ROOT-$DEPLOY_ROOT}" \
+    OBECHOW_DEPLOY_SCRIPT="${CASE_DEPLOY_SCRIPT-$DEPLOY_SCRIPT}" \
     bash "$PREFLIGHT" "$@" > "$output" 2>&1 || rc=$?
   return "$rc"
 }
@@ -500,6 +500,7 @@ invalid_input_test() {
   run_missing_env "missing EXPECTED_DNS_IPV4" EXPECTED_DNS_IPV4
   run_missing_env "missing TRAEFIK_CONTAINER" TRAEFIK_CONTAINER
 
+  CASE_APP_HOST='' run_isolated_env "empty hostname"
   CASE_APP_HOST='App.Example.TEST' run_isolated_env "uppercase hostname"
   CASE_APP_HOST='https://app.example.test' run_isolated_env "scheme-prefixed hostname"
   CASE_APP_HOST='app.example.test/path' run_isolated_env "slash-containing hostname"
@@ -514,14 +515,20 @@ invalid_input_test() {
   CASE_APP_HOST="app.example.test;touch ${MARKER}" run_isolated_env "shell-like hostname"
   assert_marker_absent "shell-like hostname"
 
+  CASE_DNS='' run_isolated_env "empty IPv4"
   CASE_DNS='1.2.3' run_isolated_env "invalid IPv4"
   CASE_DNS='256.0.0.1' run_isolated_env "out-of-range IPv4"
   CASE_DNS='203.0.113.10;touch' run_isolated_env "shell-like IPv4"
 
+  CASE_TRAEFIK='' run_isolated_env "empty Traefik container"
+  CASE_TRAEFIK='-traefik' run_isolated_env "leading-hyphen Traefik container"
   CASE_TRAEFIK="traefik;touch ${MARKER}" run_isolated_env "shell-like Traefik container"
   assert_marker_absent "shell-like Traefik container"
   CASE_TRAEFIK='traefik/evil' run_isolated_env "invalid Traefik container chars"
 
+  CASE_SOURCE='' run_isolated_env "empty source root override"
+  CASE_DEPLOY_ROOT='' run_isolated_env "empty deploy-root override"
+  CASE_DEPLOY_SCRIPT='' run_isolated_env "empty deploy-script override"
   CASE_SOURCE='relative/source' run_isolated_env "relative source root override"
   CASE_DEPLOY_ROOT='relative/apps' run_isolated_env "relative deploy-root override"
   CASE_DEPLOY_SCRIPT='relative/deploy.sh' run_isolated_env "relative deploy-script override"

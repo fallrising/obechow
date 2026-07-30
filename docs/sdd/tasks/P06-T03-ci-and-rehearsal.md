@@ -2,7 +2,7 @@
 task_id: P06-T03
 node_id: P06
 title: Add the CI gate and isolated Docker rehearsal
-status: blocked
+status: ready
 owner: grok
 reviewer: codex
 depends_on:

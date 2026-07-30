@@ -2,7 +2,7 @@
 task_id: P06-T02
 node_id: P06
 title: Implement the read-only rollout preflight
-status: ready
+status: done
 owner: grok
 reviewer: codex
 depends_on:

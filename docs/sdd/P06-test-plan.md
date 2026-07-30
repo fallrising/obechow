@@ -56,8 +56,8 @@ Each case must fail before any fake Docker, DNS, or comparison adapter runs:
 - missing, uppercase, scheme-prefixed, slash-containing, empty-label,
   overlong-label, or shell-like hostname;
 - missing or invalid/out-of-range IPv4;
-- missing or shell-like Traefik container name;
-- relative source, deploy-root, or deploy-script override.
+- missing, leading-hyphen, or shell-like Traefik container name;
+- empty or relative source, deploy-root, or deploy-script override.
 
 At least one shell-like value must include a harmless marker path and the test
 must prove the marker was not created.

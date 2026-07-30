@@ -2,7 +2,7 @@
 id: P06
 title: First-rollout readiness preflight
 status: implementing
-revision: 1
+revision: 2
 baseline_commit: 4721ed72f1398f1698980725ec1e98786eaa2f9d
 depends_on:
   - P05 versioned single-VPS deployment bundle
@@ -99,7 +99,8 @@ All path overrides must be absolute and are used only as quoted data.
   hexadecimal characters.
 - Require a lowercase DNS hostname with valid label boundaries and length.
 - Require a syntactically valid IPv4 address with every octet in `0..255`.
-- Require a container name containing only letters, digits, `_`, `.`, and `-`.
+- Require a container name that begins with an alphanumeric character and
+  otherwise contains only letters, digits, `_`, `.`, and `-`.
 - Reject invalid input before invoking Docker, DNS lookup, or file comparison.
 
 ### P06-FR-02 — Prove the installed bundle is reviewed
