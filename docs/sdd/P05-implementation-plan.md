@@ -1,7 +1,7 @@
 ---
 document_type: implementation-plan
 node_id: P05
-status: verifying
+status: done
 derived_from:
   - P05-vps-deployment-bundle.md
 owner: codex
@@ -10,7 +10,7 @@ implementation_delegate: opencode
 
 # P05 implementation plan
 
-## Current state
+## Starting state
 
 - `main` is clean at `ca66162`.
 - P04 publishes immutable images and calls the intended VPS entrypoint.
